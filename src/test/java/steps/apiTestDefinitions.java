@@ -188,5 +188,51 @@ public class apiTestDefinitions {
         assertEquals("string", response.jsonPath().getString("category.name"));
         assertEquals("string", response.jsonPath().getString("tags[0].name"));
     }
+
+    //////////////////////////////Negative POST added a new PET//////////////////
+    @Given("I have data for added a new pet to the store with invalid response")
+    public void invalidRequestPostPet() {
+        // Membuat JSON object dengan data pet yang ingin ditambahkan
+        petData = new JSONObject();
+        petData.put("id", "ABC");
+
+        // Category
+        JSONObject category = new JSONObject();
+        category.put("id", 0);
+        category.put("name", "string");
+        petData.put("category", category);
+
+        // Pet details
+        petData.put("name", "doggie");
+        petData.put("photoUrls", Arrays.asList("string"));
+
+        // Tags
+        JSONObject tag = new JSONObject();
+        tag.put("id", 0);
+        tag.put("name", "string");
+        petData.put("tags", Arrays.asList(tag));
+
+        petData.put("status", "available");
+    }
+
+    ///////////////////////////////Positive Get list pet//////////////////
+    @Given("I have valid pet id")
+    public void validRequestGetPet() {
+        // Membuat JSON object dengan data pet yang ingin ditambahkan
+        response = given()
+                       .baseUri(baseUrl)
+                       .when()
+                       .get("/pet/01");
+    }
+
+    ///////////////////////////////Negative Get list pet//////////////////
+    @Given("I have invalid pet id")
+    public void invalidRequestGetPet() {
+        // Membuat JSON object dengan data pet yang ingin ditambahkan
+        response = given()
+                       .baseUri(baseUrl)
+                       .when()
+                       .get("/pet/003" );
+    }
 }
 

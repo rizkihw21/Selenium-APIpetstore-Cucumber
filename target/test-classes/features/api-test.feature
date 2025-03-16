@@ -50,6 +50,7 @@ Scenario: Add a new pet to the store with invalid request
     Then I should get 200 status code
     And the response should contains the new pet information
 
+
  @GETnegativeFindpetID
  Scenario: Try not found pet ID
     Given I have invalid pet id
