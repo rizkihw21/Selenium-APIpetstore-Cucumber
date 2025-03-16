@@ -9,6 +9,7 @@ import static org.junit.Assert.*;
 
 import org.json.JSONObject;
 import java.util.Arrays;
+import java.util.Map;
 
 public class apiTestDefinitions {
 
@@ -16,6 +17,7 @@ public class apiTestDefinitions {
     private String baseUrl = "https://petstore.swagger.io/v2";
     private JSONObject userData;
     private JSONObject petData;
+    private JSONObject orderData;
 
     ///////////////////////////////Positive POST create User//////////////////
     @Given("I have the user data for creating a new user")
@@ -46,7 +48,7 @@ public class apiTestDefinitions {
     @Then("I should get a {int} status code")
     public void StatusCode(int statusCode) {
         // Memastikan status code yang diterima adalah sesuai (200 OK)
-        assertEquals(statusCode, response.jsonPath().getInt("code"));
+        assertEquals(statusCode, response.getStatusCode());
     }
     
     @Then("the response should contain the new user information")
@@ -139,11 +141,11 @@ public class apiTestDefinitions {
     public void validRequestPostPet() {
         // Membuat JSON object dengan data pet yang ingin ditambahkan
         petData = new JSONObject();
-        petData.put("id", 0);
+        petData.put("id", 2);
 
         // Category
         JSONObject category = new JSONObject();
-        category.put("id", 0);
+        category.put("id", 1);
         category.put("name", "string");
         petData.put("category", category);
 
@@ -153,7 +155,7 @@ public class apiTestDefinitions {
 
         // Tags
         JSONObject tag = new JSONObject();
-        tag.put("id", 0);
+        tag.put("id", 1);
         tag.put("name", "string");
         petData.put("tags", Arrays.asList(tag));
 
@@ -222,7 +224,7 @@ public class apiTestDefinitions {
         response = given()
                        .baseUri(baseUrl)
                        .when()
-                       .get("/pet/01");
+                       .get("/pet/1");
     }
 
     ///////////////////////////////Negative Get list pet//////////////////
@@ -232,7 +234,97 @@ public class apiTestDefinitions {
         response = given()
                        .baseUri(baseUrl)
                        .when()
-                       .get("/pet/003" );
+                       .get("/pet/050" );
+    }
+
+    ////////////////////////////////Get Pet Inventory//////////////////
+    @Given("I have valid API url")
+    public void validRequestGetPetInventory() {
+        // Membuat JSON object dengan data pet yang ingin ditambahkan
+        response = given()
+                       .baseUri(baseUrl)
+                       .when()
+                       .get("/store/inventory");
+    }
+
+    @Then("the response should contains the pet inventories")
+    public void ResponseBodyPetInventory() {
+        // Memastikan bahwa response tidak null
+        assertNotNull("Inventory response should not be null", response.getBody().asString());
+
+        // Mengambil seluruh respons dalam bentuk Map
+        Map<String, Object> inventory = response.jsonPath().getMap("");
+
+        // Memastikan inventory tidak null
+        assertNotNull("Inventory should not be null", inventory);
+
+        // Memeriksa semua kategori dalam inventory response
+        for (Map.Entry<String, Object> entry : inventory.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            
+            // Memastikan bahwa value tidak null
+            assertNotNull("Value for key " + key + " should not be null", value);
+            
+            // Memeriksa apakah nilai tersebut adalah tipe Integer atau Long
+            if (value instanceof Integer) {
+                assertTrue("Value for key " + key + " should be greater than or equal to 0", (Integer) value >= 0);
+            } else if (value instanceof Long) {
+                assertTrue("Value for key " + key + " should be greater than or equal to 0", (Long) value >= 0);
+            } else if (value instanceof String) {
+                // Jika nilai tersebut berupa String, kamu bisa memeriksa panjangnya
+                assertTrue("Value for key " + key + " should not be an empty string", ((String) value).length() > 0);
+            } else {
+                // Jika tipe data tidak sesuai, lemparkan error
+                fail("Unexpected type for key " + key + ": " + value.getClass());
+            }
+        }
+    }
+
+    ////////////////////////////////Positive Post added order//////////////////
+    @Given("I have data for added a new order for a pet")
+    public void validRequestPostOrder() {
+        // Membuat JSON object dengan data order yang ingin ditambahkan
+        orderData = new JSONObject();
+        orderData.put("id", 2);
+        orderData.put("petId", 1);
+        orderData.put("quantity", 2);
+        orderData.put("shipDate", "2027-03-16T14:05:54.867Z");
+        orderData.put("status", "placed");
+        orderData.put("complete", true);
+    }
+    @When("I send a POST request to {string}")
+    public void POSTrequestOrder(String endpoint) {
+        // Mengirimkan request POST ke endpoint /store/order dengan data JSON yang sudah disiapkan
+        response = given()
+                       .baseUri(baseUrl)
+                       .header("Content-Type", "application/json")
+                       .body(orderData.toString()) // Menambahkan data JSON sebagai request body
+                   .when()
+                       .post("/store/order");
+    }
+    @Then("the response should contains the order")
+    public void ResponseBodyOrder() {
+        // Memastikan bahwa response tidak null
+        assertNotNull("Response body should not be null", response.getBody().asString());
+
+        // Memastikan data order sesuai dengan yang dikirimkan
+        assertEquals("placed", response.jsonPath().getString("status"));
+        assertEquals(true, response.jsonPath().getBoolean("complete"));
+        assertEquals(1, response.jsonPath().getInt("petId"));
+        assertEquals(2, response.jsonPath().getInt("quantity"));
+    }
+
+    /////////////////////////////Negative Post added order//////////////////
+    @Given("I have invalid data for added a new order for a pet")
+    public void invalidRequestPostOrder() {
+        // Membuat JSON object dengan data order yang ingin ditambahkan
+        orderData = new JSONObject();
+        orderData.put("id", 2);
+        orderData.put("petId", 1);
+        orderData.put("quantity", "ABC");
+        orderData.put("shipDate", "2027-03-16T14:05:54.867Z");
+        orderData.put("status", "placed");
+        orderData.put("complete", true);
     }
 }
-

@@ -6,8 +6,8 @@ import org.junit.runner.RunWith;
 @CucumberOptions(
     features = "src/test/resources/features", // Lokasi file feature Gherkin
     glue = "steps", // Lokasi step definitions
-    plugin = {"pretty", "html:target/cucumber-report.html"}, // Menyediakan laporan HTML
-    // tags = "@GETpositiveFindpetID"
+    plugin = {"pretty", "html:target/cucumber-report.html"} // Menyediakan laporan HTML
+    // tags = "@POSTstoreOrder"
 )
 public class TestRunner {
 }
