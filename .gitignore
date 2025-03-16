@@ -1,8 +1,30 @@
 # Compiled class file
 *.class
 
+# Ignore build directories
+/build/
+target/
+
+# Ignore IDE configurations
+.idea/
+.vscode/
+
+# Ignore Maven or Gradle build directories
+/.mvn/
+/.gradle/
+/target/
+
+# Ignore IntelliJ IDEA project files
+*.iml
+*.ipr
+*.iws
+
+# Ignore Cucumber feature files with step definitions
+*.feature
+
 # Log file
 *.log
+*.tmp
 
 # BlueJ files
 *.ctxt
